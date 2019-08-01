@@ -1,3 +1,5 @@
+![cryptotable-snapshot](https://user-images.githubusercontent.com/2750048/62306226-b6abbd00-b481-11e9-9fc2-036a6881b575.png)
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
