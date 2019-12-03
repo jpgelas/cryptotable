@@ -1,62 +1,88 @@
 import React from 'react';
-import { Table, Button } from 'react-bootstrap';
+import { Table, Spinner } from 'react-bootstrap';
 import './CryptoTable.css';
-// import tickers from './tickers.json';
 
 class CryptoTable extends React.Component {
   
   constructor(props) {
     super(props);
     this.state = { tickers: [] };
-    this.onSort = this.onSort.bind(this)
+    //this.handleSort = this.handleSort.bind(this)
   }
 
-  componentDidMount() {
-    this.fetchTickers()
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  componentDidMount() {    
   }
 
   fetchTickers() {
-    fetch("https://api.coinmarketcap.com/v1/ticker/?limit=50")
-      .then(function(response) {
-        return response.json();
-      })
-      .then(items => this.setState({ tickers : items })); 
+    this.sleep(1000).then(
+      () => {
+
+        fetch("https://api.coinmarketcap.com/v1/ticker/?limit=50")
+        .then(function(response) {
+          return response.json();
+        })
+        .then(tickers => this.setState({ tickers }));
+
+        // console.log("Tickers fetched :-)")
+        this.props.resetUpdate()
+      }
+    )
+     
   }
 
-  onSort(event, sortKey){ 
+  handleSort(event, sortKey){ 
     const tickers = this.state.tickers;
     tickers.sort((a,b) => sortKey === 'rank' ? a[sortKey] - b[sortKey] : b[sortKey] - a[sortKey] )
     this.setState({tickers})
   }
 
-  onUpdate(event) {
-    //console.log("Updating...", event)
-    this.fetchTickers()
-
+  spinner() {
+    return (  
+      <div>
+        <Spinner animation="border" role="status" size="sm">
+          <span className="sr-only">Loading...</span>
+        </Spinner>
+      </div>
+    )
   }
+
+  nospinner() {
+    return (
+      <div># &nbsp;</div>
+    )
+  }
+
 
   render() {
       const tickers = this.state.tickers;
+      
       const footerStyle = {color: 'grey', 'textAlign': 'center'};
       
       const date = new Date();
       const currDate = date.toDateString();
       const currTime = date.toLocaleTimeString();
 
+      if (this.props.update === true) { 
+        this.fetchTickers()
+      }
+
       const tableHeaders = (
         <thead>
           <tr>             
-             
-            <th className='text-warning' onClick={e => this.onSort(e, 'rank')} style={{cursor: 'pointer'}} ># &nbsp;
-              <Button  variant="outline-warning" size="sm" onClick={e => this.onUpdate(e)}>Update</Button>
+            <th className='text-warning' onClick={e => this.handleSort(e, 'rank')} 
+              style={{cursor: 'pointer'}} >
+              { this.props.update ? this.spinner() :  this.nospinner() }
             </th>
-            
             <th>Name</th>
             <th>Symbol</th>
             <th>Price</th>
-            <th className='text-warning' onClick={e => this.onSort(e, 'percent_change_1h')} style={{cursor: 'pointer'}}>% 1h</th>
-            <th className='text-warning' onClick={e => this.onSort(e, 'percent_change_24h')} style={{cursor: 'pointer'}}>% 24h</th>
-            <th className='text-warning' onClick={e => this.onSort(e, 'percent_change_7d')} style={{cursor: 'pointer'}}>% 7d</th>
+            <th className='text-warning' onClick={e => this.handleSort(e, 'percent_change_1h')} style={{cursor: 'pointer'}}>% 1h</th>
+            <th className='text-warning' onClick={e => this.handleSort(e, 'percent_change_24h')} style={{cursor: 'pointer'}}>% 24h</th>
+            <th className='text-warning' onClick={e => this.handleSort(e, 'percent_change_7d')} style={{cursor: 'pointer'}}>% 7d</th>
           </tr>
         </thead>
       );
@@ -72,12 +98,11 @@ class CryptoTable extends React.Component {
             })
           }
           <tr><td colSpan="7" style={footerStyle}> 
-            Data provided by <a href="https://coinmarketcap.com">CoinMarketCap.com</a>&nbsp;-&nbsp; 
+            Data provided by <a href="https://coinmarketcap.com">coinmarketcap.com</a>&nbsp;-&nbsp; 
             {currDate} {currTime} </td>
           </tr>
         </tbody>
-      );
-      //<Table className="table table-bordered table-hover" width="100%" >  
+      ); 
       
       return (
         <Table striped bordered hover size="sm" variant="dark" width="100%">             
@@ -102,7 +127,7 @@ class TickerItem extends React.Component {
         <td> {ticker['rank']}</td>
         <td> <a href={tickerLink}>{ticker['name']}</a> </td>
         <td> {ticker['symbol']} </td>
-        <td> {ticker['price_usd']}</td>
+        <td> {Number(ticker['price_usd']).toFixed(4)}</td>
         <td style={ ticker['percent_change_1h']  >= 0 ? greenStyle : redStyle }> {ticker['percent_change_1h']}</td>
         <td style={ ticker['percent_change_24h'] >= 0 ? greenStyle : redStyle }> {ticker['percent_change_24h']}</td>
         <td style={ ticker['percent_change_7d']  >= 0 ? greenStyle : redStyle }> {ticker['percent_change_7d']}</td>
