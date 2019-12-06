@@ -7,7 +7,6 @@ class CryptoTable extends React.Component {
   constructor(props) {
     super(props);
     this.state = { tickers: [] };
-    //this.handleSort = this.handleSort.bind(this)
   }
 
   sleep(ms) {

@@ -23,7 +23,7 @@ class CryptoMonitor extends React.Component {
         }
     }    
     
-    componentDidMount() { }
+    componentDidMount() {}
 
     handleClickForceUpdate() {
         this.setState({update: true })
@@ -36,7 +36,8 @@ class CryptoMonitor extends React.Component {
     render() {
         return (
             <div>
-                <CryptoHeader onClickForceUpdate={() => this.handleClickForceUpdate()} />
+                <CryptoHeader   update={this.state.update} 
+                                onClickForceUpdate={() => this.handleClickForceUpdate()} />
 
                 <CryptoTable    symbolList={symbolList} 
                                 update={this.state.update}  

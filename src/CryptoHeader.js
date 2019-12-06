@@ -1,5 +1,5 @@
 import React from 'react'
-import { Jumbotron, Button } from 'react-bootstrap';
+import { Jumbotron, Button, Spinner, Container } from 'react-bootstrap';
 
 class CryptoHeader extends React.Component {
 
@@ -11,15 +11,44 @@ class CryptoHeader extends React.Component {
   componentDidMount() {
       this.fetchGlobal()
   }
-  
-  fetchGlobal() {
-    fetch("https://api.coinmarketcap.com/v1/global/")
-          .then(function(response) {
-            return response.json();
-          })
-          .then(global => this.setState({ global })); 
+
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
   
+  fetchGlobal() {
+    this.sleep(1000).then(
+      () => {
+            fetch("https://api.coinmarketcap.com/v1/global/")
+                  .then(function(response) {
+                    return response.json();
+                  })
+                  .then(global => this.setState({ global })); 
+    });
+  }
+  
+
+  spinner() {
+    return (
+      <Button variant="secondary" disabled>
+          <Spinner
+            as="span"
+            animation="border"
+            size="sm"
+            role="status"
+            aria-hidden="true"
+          />
+          &nbsp;Loading...
+      </Button>
+    )
+  }
+
+  nospinner() {
+    return (
+      <Button variant="warning" size="sm" onClick={() => this.handleClick()}>Update</Button>
+    )
+  }
+
   handleClick() {
     this.props.onClickForceUpdate() // call handleClickForceUpdate() of CryptoMonitor component
     this.fetchGlobal()
@@ -29,15 +58,15 @@ class CryptoHeader extends React.Component {
     const global = this.state.global;
     
     return ( 
-      <Jumbotron>
+      <Jumbotron className="bg-dark text-white">
         <h1>CryptoTable</h1>
         <p>
           <b>Marketcap :</b> ${parseInt(global['total_market_cap_usd']).toLocaleString('EN-us')}<br/>
           <b>24h Vol :</b> ${parseFloat(global['total_24h_volume_usd']).toLocaleString('EN-us')}<br /> 
           <b>BTC Dominance :</b> {global['bitcoin_percentage_of_market_cap']}%
         </p>
+        { this.props.update ? this.spinner() :  this.nospinner() }
         
-        <Button variant="secondary" size="sm" onClick={() => this.handleClick()}>Update</Button>
       </Jumbotron>
     );
   }
