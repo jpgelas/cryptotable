@@ -11,7 +11,7 @@ import CryptoTable from './CryptoTable';
 const symbolList =  [   
                         'BTC', 'ETH',  'BCH', 'LTC', 'XRP', 'XLM', 
                         'ADA', 'EOS', 'XMR', 'TRX', 'DASH', 
-                        'BNB', 'NEO', 'XEM', 'ZRX', 'BAT',
+                        'BNB', 'NEO', 'XEM', 'ZRX', 'BAT', 'ZEC',
                     ]
 
 class CryptoMonitor extends React.Component {  
@@ -26,25 +26,28 @@ class CryptoMonitor extends React.Component {
     componentDidMount() {}
 
     handleClickForceUpdate() {
-        this.setState({update: true })
+        this.setState({update : true})
     }
 
     resetUpdate = () => {
-        this.setState( { update : false } )
+        this.setState({update : false})
     }
 
     render() {
         return (
             <div>
-                <CryptoHeader   update={this.state.update} 
-                                onClickForceUpdate={() => this.handleClickForceUpdate()} />
-
-                <CryptoTable    symbolList={symbolList} 
-                                update={this.state.update}  
-                                resetUpdate={()=> this.resetUpdate()} />   
+                <CryptoHeader update={this.state.update} 
+                              onClickForceUpdate={() => this.handleClickForceUpdate()} 
+                />
+                <CryptoTable  symbolList={symbolList} 
+                              update={this.state.update} 
+                              resetUpdate={()=> this.resetUpdate()} />   
             </div>
         )
     }
 }
+
+
+
 
 export default CryptoMonitor;

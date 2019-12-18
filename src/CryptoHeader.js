@@ -1,34 +1,33 @@
-import React from 'react'
-import { Jumbotron, Button, Spinner, Container } from 'react-bootstrap';
+import React, {useState, useEffect} from 'react'
+import { Jumbotron, Button, Spinner } from 'react-bootstrap';
 
-class CryptoHeader extends React.Component {
+function CryptoHeader ( props ) {
 
-  constructor(props) {
-    super(props);
-    this.state = { global: {} };
-  }
+  const [ global, setGlobal ] = useState({}); 
+  const [ isLoading, setIsLoading ] = useState(false);  
 
-  componentDidMount() {
-      this.fetchGlobal()
-  }
+  useEffect(() => {
+    //document.title = isLoading ? "Loading..." : "Crypto";
+    fetchGlobal()
+  }, []);
 
-  sleep(ms) {
+  function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
-  
-  fetchGlobal() {
-    this.sleep(1000).then(
-      () => {
-            fetch("https://api.coinmarketcap.com/v1/global/")
-                  .then(function(response) {
-                    return response.json();
-                  })
-                  .then(global => this.setState({ global })); 
-    });
+
+  async function fetchGlobal() {
+    setIsLoading(true);
+    document.title =  "Loading..." 
+    await sleep(1000) // Fake response time...
+    console.log('Fetch global')
+    const response = await fetch("https://api.coinmarketcap.com/v1/global/");
+    const data = await response.json()
+    setGlobal( data )
+    setIsLoading(false)
+    document.title =  "Crypto" 
   }
   
-
-  spinner() {
+  function spinnerButton() {
     return (
       <Button variant="secondary" disabled>
           <Spinner
@@ -43,21 +42,20 @@ class CryptoHeader extends React.Component {
     )
   }
 
-  nospinner() {
+  function updateButton() {
     return (
-      <Button variant="warning" size="sm" onClick={() => this.handleClick()}>Update</Button>
+      <Button variant="warning" size="sm" onClick={
+        () => { 
+          props.onClickForceUpdate(); // call handleClickForceUpdate() of CryptoMonitor component
+          fetchGlobal()
+        }
+      }>Update</Button>
     )
   }
-
-  handleClick() {
-    this.props.onClickForceUpdate() // call handleClickForceUpdate() of CryptoMonitor component
-    this.fetchGlobal()
-  }
-
-  render() {
-    const global = this.state.global;
-    
-    return ( 
+  
+  console.log('global = ', global);
+  
+  return ( 
       <Jumbotron className="bg-dark text-white">
         <h1>CryptoTable</h1>
         <p>
@@ -65,11 +63,12 @@ class CryptoHeader extends React.Component {
           <b>24h Vol :</b> ${parseFloat(global['total_24h_volume_usd']).toLocaleString('EN-us')}<br /> 
           <b>BTC Dominance :</b> {global['bitcoin_percentage_of_market_cap']}%
         </p>
-        { this.props.update ? this.spinner() :  this.nospinner() }
-        
+        { 
+          isLoading ? spinnerButton() : updateButton() 
+        }
       </Jumbotron>
-    );
-  }
+  );
+  
 }
 
 //<Button variant="secondary" size="sm" onClick={this.props.onClick}>Update</Button>
